@@ -30,22 +30,21 @@ def main():
 
     if any(blocked.lower() in latest_track.lower() for blocked in get_blocklist()):
         print("blocked")
-        quit()
+        return
 
-    if now_playing.startswith(latest_track):
-        print("Updating status")
-        update_status(latest_track, 'headphones')
+    if not now_playing.startswith(latest_track):
+        print("not currently playing")
+        return
 
-
-# def update_status(message, icon):
-#     expiry = datetime.now() + timedelta(minutes=5)
-#     expiry_str = expiry.strftime("%H:%M")
-#     execute_script(f'tell script "Slack" to set status "{message}" with icon ":{icon}:"')
+    print("updating status")
+    simple_title = latest_track.split('(', 1)[0].strip()
+    set_status(simple_title, 'headphones', 6)
 
 
 def execute_script(script):
     process = Popen(['osascript', '-'], stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     stdout, stderr = process.communicate(script)
+    print(stderr)
     return stdout
 
 
@@ -91,4 +90,4 @@ def read_har():
     return xc, xd, xds
 
 
-set_status('weekend', 'catjam', 30)
+main()

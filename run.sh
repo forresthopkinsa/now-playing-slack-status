@@ -1,4 +1,6 @@
 #!/bin/sh
 
 cd "$(dirname "$0")"
-python3 script.py
+echo '\n==========\n' >> log
+date >> log
+/usr/local/bin/python3 script.py >> log

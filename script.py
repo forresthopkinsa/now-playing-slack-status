@@ -43,7 +43,10 @@ def main():
         print("not currently playing")
         return
 
-    status = f'{subst(simple_title)} - {subst(latest_artist)}'
+    subst_title = subst(simple_title)
+    subst_artist = subst(latest_artist)
+    (trunc_title, trunc_artist) = dualTruncate(subst_title, subst_artist)
+    status = f'{trunc_title} - {trunc_artist}'
     print(f'setting status to: {status}')
     resp = set_status(status, 'headphones', 5)
     print(f'server response: {resp}')
@@ -73,15 +76,33 @@ def read_file_to_json(path):
         return json.load(file)
 
 
-def subst(string):
+def subst(s):
     subs = read_file_to_json('substitutions.json')
     for key, val in subs.items():
-        string = re.sub(key, val, string, flags=re.IGNORECASE)
-    return string
+        s = re.sub(key, val, s, flags=re.IGNORECASE)
+    return s
 
 
-def urlencode(string):
-    return urllib.parse.quote_plus(string)
+def dualTruncate(a, b):
+    # Slack max. status length is 100, and we add " - ", so that leaves us 97 characters
+    if len(a) + len(b) > 97:
+        if len(a) >= len(b):
+            a = truncate(a)
+        else:
+            b = truncate(b)
+        # Recurse until we're under 97
+        return dualTruncate(a, b)
+    else:
+        return (a, b)
+
+
+# Shave off one character, replace last three with ellipsis
+def truncate(s):
+    return s[:-4] + "..."
+
+
+def urlencode(s):
+    return urllib.parse.quote_plus(s)
 
 
 def set_status(text, emoji, minutes):
